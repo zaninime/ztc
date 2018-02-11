@@ -16,11 +16,12 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
+	"io/ioutil"
 	"log"
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
+	"github.com/zaninime/ztc/api"
 )
 
 // editCmd represents the edit command
@@ -44,26 +45,26 @@ Tip: dump the current configuration first using
 		cntrl := getAPIController()
 
 		networkID := args[0]
-		network, err := cntrl.GetNetwork(networkID)
+		configFile := args[1]
+
+		fileContent, err := ioutil.ReadFile(configFile)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		network.EditableNetwork.Name = "hello world"
-
-		network2, err := cntrl.EditNetwork(networkID, network.EditableNetwork)
+		var config api.EditableNetwork
+		err = yaml.Unmarshal(fileContent, &config)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		yaml, err := yaml.Marshal(network2)
+		_, err = cntrl.EditNetwork(networkID, &config)
+
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		fmt.Println(string(yaml))
 	},
 }
 
