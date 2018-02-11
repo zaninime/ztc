@@ -36,6 +36,8 @@ the details about a specific network.`,
 			log.Fatalln("Pass the network id")
 		}
 
+		networkID := args[0]
+
 		url, err := url.Parse(viper.GetString("baseUrl"))
 
 		if err != nil {
@@ -47,7 +49,7 @@ the details about a specific network.`,
 			AuthToken: viper.GetString("authToken"),
 		}
 
-		network, err := cntrl.GetNetwork(args[0])
+		network, err := cntrl.GetNetwork(networkID)
 
 		if err != nil {
 			log.Fatal(err)

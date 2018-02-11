@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"net"
 	"net/http"
@@ -78,4 +79,40 @@ func (c *Controller) GetNetwork(networkID string) (*Network, error) {
 
 	return &decodedValue, nil
 
+}
+
+func (c *Controller) EditNetwork(networkID string, config *EditableNetwork) (*Network, error) {
+	endpoint := c.getEndpointURL("/controller/network/" + networkID)
+
+	requestBody, err := json.Marshal(config)
+
+	requestBodyReader := bytes.NewBuffer(requestBody)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post(endpoint, "application/json", requestBodyReader)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	// duplicate from above
+	if resp.StatusCode != http.StatusOK {
+		return nil, ErrBadCode
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	var decodedValue Network
+	err = decoder.Decode(&decodedValue)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &decodedValue, nil
+	// end duplicate from above
 }

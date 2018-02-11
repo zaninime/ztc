@@ -16,8 +16,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"net/url"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/zaninime/ztc/api"
 )
 
 // editCmd represents the edit command
@@ -28,7 +33,43 @@ var editCmd = &cobra.Command{
 be presented as a YAML file in your preferred editor. Save the file and quit to commit.
 To abort, save an empty file.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("edit called")
+		if len(args) != 1 {
+			log.Fatalln("Pass the network id")
+		}
+
+		networkID := args[0]
+
+		url, err := url.Parse(viper.GetString("baseUrl"))
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		cntrl := api.Controller{
+			BaseURL:   *url,
+			AuthToken: viper.GetString("authToken"),
+		}
+
+		network, err := cntrl.GetNetwork(networkID)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		network.EditableNetwork.Name = "hello world"
+
+		network2, err := cntrl.EditNetwork(networkID, network.EditableNetwork)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		yaml, err := yaml.Marshal(network2)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(string(yaml))
 	},
 }
 
