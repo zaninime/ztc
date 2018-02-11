@@ -76,12 +76,24 @@ the details about a specific network.`,
 			log.Fatal(err)
 		}
 
-		yaml, err := yaml.Marshal(network)
+		editableOnly, err := cmd.Flags().GetBool("editable-only")
+		if err != nil {
+			panic(err)
+		}
+
+		var encodedNetwork []byte
+
+		if editableOnly {
+			encodedNetwork, err = yaml.Marshal(network.EditableNetwork)
+		} else {
+			encodedNetwork, err = yaml.Marshal(network)
+		}
+
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println(string(yaml))
+		fmt.Println(string(encodedNetwork))
 	},
 }
 
@@ -97,4 +109,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// showCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	showCmd.Flags().Bool("editable-only", false, "Only return the editable part of the network")
 }
