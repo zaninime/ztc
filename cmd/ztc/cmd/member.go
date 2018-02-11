@@ -28,13 +28,6 @@ var memberCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(memberCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// memberCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// memberCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	memberCmd.PersistentFlags().String("net", "", "Network ID used for the operations")
+	memberCmd.MarkPersistentFlagRequired("net")
 }

@@ -22,9 +22,9 @@ import (
 
 // memberEditCmd represents the memberEdit command
 var memberEditCmd = &cobra.Command{
-	Use:   "edit",
-	Short: "Edit the membership of a node interactively",
-	Long:  `Edit the membership of a node interactively.`,
+	Use:   "edit node-id",
+	Short: "Edit the membership of a node",
+	Long:  `Edit the membership of a node.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("memberEdit called")
 	},
@@ -32,14 +32,4 @@ var memberEditCmd = &cobra.Command{
 
 func init() {
 	memberCmd.AddCommand(memberEditCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// memberEditCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// memberEditCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

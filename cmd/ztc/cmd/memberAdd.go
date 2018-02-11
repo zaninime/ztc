@@ -22,7 +22,7 @@ import (
 
 // memberAddCmd represents the memberAdd command
 var memberAddCmd = &cobra.Command{
-	Use:   "add",
+	Use:   "add node-id",
 	Short: "Add a node to the member list",
 	Long:  `Add a node to the member list.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -32,14 +32,4 @@ var memberAddCmd = &cobra.Command{
 
 func init() {
 	memberCmd.AddCommand(memberAddCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// memberAddCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// memberAddCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

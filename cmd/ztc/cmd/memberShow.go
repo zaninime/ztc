@@ -22,9 +22,9 @@ import (
 
 // memberShowCmd represents the memberShow command
 var memberShowCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show members of a network",
-	Long:  `Show members of a network.`,
+	Use:   "show [node-id]",
+	Short: "List members or show details about one",
+	Long:  `List members or show details about one.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("memberShow called")
 	},
