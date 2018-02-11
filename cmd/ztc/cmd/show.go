@@ -16,8 +16,12 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"net/url"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/zaninime/ztc/api"
 )
 
 // showCmd represents the show command
@@ -27,7 +31,28 @@ var showCmd = &cobra.Command{
 	Long: `Show a list of all the networks managed by the controller or
 the details about a specific network.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("show called")
+		if len(args) != 1 {
+			log.Fatalln("Pass the network id")
+		}
+
+		url, err := url.Parse(viper.GetString("baseUrl"))
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		cntrl := api.Controller{
+			BaseURL:   *url,
+			AuthToken: viper.GetString("authToken"),
+		}
+
+		network, err := cntrl.GetNetwork(args[0])
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("%#v", network.EditableNetwork)
 	},
 }
 

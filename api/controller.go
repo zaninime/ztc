@@ -8,6 +8,8 @@ import (
 	"path"
 )
 
+var ErrBadCode = errors.New("unexpected response code from server")
+
 type Status struct {
 	APIVersion int `json:"apiVersion"`
 	Clock      int `json:"clock"`
@@ -18,7 +20,7 @@ type Controller struct {
 	AuthToken string
 }
 
-func (c *Controller) getEndpointURL(endpoint string) url.URL {
+func (c *Controller) getEndpointURL(endpoint string) string {
 	newPath := path.Join(c.BaseURL.Path, endpoint)
 	query := url.Values{}
 	query.Add("auth", c.AuthToken)
@@ -27,14 +29,13 @@ func (c *Controller) getEndpointURL(endpoint string) url.URL {
 	finalURL.Path = newPath
 	finalURL.RawQuery = query.Encode()
 
-	return finalURL
+	return finalURL.String()
 }
 
 func (c *Controller) GetStatus() (*Status, error) {
 	endpoint := c.getEndpointURL("/controller")
-	endpointStr := endpoint.String()
 
-	resp, err := http.Get(endpointStr)
+	resp, err := http.Get(endpoint)
 
 	if err != nil {
 		return nil, err
@@ -43,7 +44,7 @@ func (c *Controller) GetStatus() (*Status, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("Not good")
+		return nil, ErrBadCode
 	}
 
 	decoder := json.NewDecoder(resp.Body)
