@@ -49,9 +49,9 @@ type EditableNetwork struct {
 
 type Network struct {
 	*EditableNetwork
-	ID           string `json:"id"`
-	Revision     int    `json:"revision"`
-	CreationTime int    `json:"creationTime"`
+	ID           string            `json:"id"`
+	Revision     int               `json:"revision"`
+	CreationTime EpochMilliSeconds `json:"creationTime"`
 }
 
 func (c *Controller) GetNetwork(networkID string) (*Network, error) {

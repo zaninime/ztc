@@ -17,12 +17,8 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"net/url"
-	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/zaninime/ztc/api"
 )
 
 // statusCmd represents the status command
@@ -31,25 +27,14 @@ var statusCmd = &cobra.Command{
 	Short: "Display the controller status",
 	Long:  "Display the controller status.",
 	Run: func(cmd *cobra.Command, args []string) {
-		url, err := url.Parse(viper.GetString("baseUrl"))
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		cntrl := api.Controller{
-			BaseURL:   *url,
-			AuthToken: viper.GetString("authToken"),
-		}
+		cntrl := getAPIController()
 
 		status, err := cntrl.GetStatus()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		time := time.Unix(0, int64(status.Clock)*1000000)
-
-		fmt.Printf("API Version: %d\nCurrent Time: %s\n", status.APIVersion, time)
+		fmt.Printf("API Version: %d\nCurrent Time: %s\n", status.APIVersion, status.Clock)
 	},
 }
 

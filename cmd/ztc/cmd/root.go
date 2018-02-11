@@ -16,11 +16,14 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"net/url"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/zaninime/ztc/api"
 )
 
 var cfgFile string
@@ -86,4 +89,19 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func getAPIController() api.Controller {
+	url, err := url.Parse(viper.GetString("baseUrl"))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cntrl := api.Controller{
+		BaseURL:   *url,
+		AuthToken: viper.GetString("authToken"),
+	}
+
+	return cntrl
 }

@@ -15,33 +15,40 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"net/url"
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/zaninime/ztc/api"
 )
 
 // showCmd represents the show command
 var showCmd = &cobra.Command{
-	Use:   "show",
+	Use:   "show [network-id]",
 	Short: "List managed networks or show the details about one",
 	Long: `Show a list of all the networks managed by the controller or
 the details about a specific network.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		url, err := url.Parse(viper.GetString("baseUrl"))
-
+	Args: func(cmd *cobra.Command, args []string) error {
+		editableOnly, err := cmd.Flags().GetBool("editable-only")
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 
-		cntrl := api.Controller{
-			BaseURL:   *url,
-			AuthToken: viper.GetString("authToken"),
+		if editableOnly && len(args) == 0 {
+			return errors.New("--editable-only can be used only when specifying the network id")
 		}
+
+		if len(args) > 1 {
+			return errors.New("this command accepts at most one argument")
+		}
+
+		// TODO: Validate network ID here
+
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		cntrl := getAPIController()
 
 		if len(args) != 1 {
 			networks, err := cntrl.GetNetworkList()
@@ -100,14 +107,5 @@ the details about a specific network.`,
 func init() {
 	RootCmd.AddCommand(showCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// showCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// showCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	showCmd.Flags().Bool("editable-only", false, "Only return the editable part of the network")
 }

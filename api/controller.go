@@ -6,13 +6,30 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strconv"
+	"time"
 )
 
 var ErrBadCode = errors.New("unexpected response code from server")
 
+type EpochMilliSeconds struct{ *time.Time }
+
+func (t *EpochMilliSeconds) UnmarshalJSON(jsonValue []byte) error {
+	ms, err := strconv.ParseInt(string(jsonValue), 0, 64)
+
+	if err != nil {
+		return err
+	}
+
+	time := time.Unix(0, ms*1000000)
+
+	t.Time = &time
+	return nil
+}
+
 type Status struct {
-	APIVersion int `json:"apiVersion"`
-	Clock      int `json:"clock"`
+	APIVersion int               `json:"apiVersion"`
+	Clock      EpochMilliSeconds `json:"clock"`
 }
 
 type Controller struct {

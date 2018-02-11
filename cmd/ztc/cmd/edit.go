@@ -15,41 +15,35 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"net/url"
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/zaninime/ztc/api"
 )
 
 // editCmd represents the edit command
 var editCmd = &cobra.Command{
-	Use:   "edit",
-	Short: "Edit a network interactively",
-	Long: `Edit a network interactively. The network configuration will
-be presented as a YAML file in your preferred editor. Save the file and quit to commit.
-To abort, save an empty file.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			log.Fatalln("Pass the network id")
+	Use:   "edit network-id config-file.yml",
+	Short: "Edit a network",
+	Long: `Edit a network. Provide both the network ID and a yaml file
+to read the network configuration from.
+
+Tip: dump the current configuration first using
+  ztc show network-id --editable-only > config-file.yml`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 2 {
+			return errors.New("this command accepts exactly two arguments")
 		}
+
+		// TODO: validate network id
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		cntrl := getAPIController()
 
 		networkID := args[0]
-
-		url, err := url.Parse(viper.GetString("baseUrl"))
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		cntrl := api.Controller{
-			BaseURL:   *url,
-			AuthToken: viper.GetString("authToken"),
-		}
-
 		network, err := cntrl.GetNetwork(networkID)
 
 		if err != nil {
