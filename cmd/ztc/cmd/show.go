@@ -19,6 +19,7 @@ import (
 	"log"
 	"net/url"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/zaninime/ztc/api"
@@ -52,7 +53,12 @@ the details about a specific network.`,
 			log.Fatal(err)
 		}
 
-		fmt.Printf("%#v", network.EditableNetwork)
+		yaml, err := yaml.Marshal(network)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(string(yaml))
 	},
 }
 
