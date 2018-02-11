@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"text/tabwriter"
 
 	yaml "github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
@@ -42,6 +44,9 @@ the details about a specific network.`,
 				log.Fatal(err)
 			}
 
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+			fmt.Fprintln(w, "ID\tType\tName")
+
 			for _, networkID := range networks {
 				network, err := cntrl.GetNetwork(networkID)
 				if err != nil {
@@ -54,8 +59,9 @@ the details about a specific network.`,
 					networkType = "private"
 				}
 
-				fmt.Printf("%s: %s, %s\n", network.ID, network.EditableNetwork.Name, networkType)
+				fmt.Fprintf(w, "%s\t%s\t%s\n", network.ID, networkType, network.Name)
 			}
+			w.Flush()
 
 			return
 		}
