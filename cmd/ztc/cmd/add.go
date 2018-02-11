@@ -15,31 +15,52 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"log"
 
+	yaml "github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 )
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
-	Use:   "add",
+	Use:   "add [network-id]",
 	Short: "Add a network to manage",
 	Long:  `Add a network to manage.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) > 1 {
+			return errors.New("this command accepts at most one argument")
+		}
+
+		// TODO: Validate network ID here
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		networkID := ""
+
+		if len(args) == 1 {
+			networkID = args[0]
+		}
+
+		cntrl := getAPIController()
+
+		network, err := cntrl.AddNetwork(networkID)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		encodedNetwork, err := yaml.Marshal(network)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(string(encodedNetwork))
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(addCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

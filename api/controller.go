@@ -27,9 +27,34 @@ func (t *EpochMilliSeconds) UnmarshalJSON(jsonValue []byte) error {
 	return nil
 }
 
-type Status struct {
+type Status2 struct {
 	APIVersion int               `json:"apiVersion"`
 	Clock      EpochMilliSeconds `json:"clock"`
+}
+
+type Status struct {
+	Address string            `json:"address"`
+	Clock   EpochMilliSeconds `json:"clock"`
+	Cluster interface{}       `json:"cluster"`
+	Config  struct {
+		Physical interface{} `json:"physical"`
+		Settings struct {
+			PortMappingEnabled    bool   `json:"portMappingEnabled"`
+			PrimaryPort           int    `json:"primaryPort"`
+			SoftwareUpdate        string `json:"softwareUpdate"`
+			SoftwareUpdateChannel string `json:"softwareUpdateChannel"`
+		} `json:"settings"`
+	} `json:"config"`
+	Online               bool   `json:"online"`
+	PlanetWorldID        int    `json:"planetWorldId"`
+	PlanetWorldTimestamp int64  `json:"planetWorldTimestamp"`
+	PublicIdentity       string `json:"publicIdentity"`
+	TCPFallbackActive    bool   `json:"tcpFallbackActive"`
+	Version              string `json:"version"`
+	VersionBuild         int    `json:"versionBuild"`
+	VersionMajor         int    `json:"versionMajor"`
+	VersionMinor         int    `json:"versionMinor"`
+	VersionRev           int    `json:"versionRev"`
 }
 
 type Controller struct {
@@ -50,7 +75,7 @@ func (c *Controller) getEndpointURL(endpoint string) string {
 }
 
 func (c *Controller) GetStatus() (*Status, error) {
-	endpoint := c.getEndpointURL("/controller")
+	endpoint := c.getEndpointURL("/status")
 
 	resp, err := http.Get(endpoint)
 

@@ -105,7 +105,6 @@ func (c *Controller) GetNetwork(networkID string) (*Network, error) {
 	}
 
 	return &decodedValue, nil
-
 }
 
 func (c *Controller) EditNetwork(networkID string, config *EditableNetwork) (*Network, error) {
@@ -168,4 +167,65 @@ func (c *Controller) GetNetworkList() ([]string, error) {
 	}
 
 	return decodedValue, nil
+}
+
+func (c *Controller) AddNetwork(networkID string) (*Network, error) {
+	if networkID == "" {
+		// auto ID
+		status, err := c.GetStatus()
+
+		if err != nil {
+			return nil, err
+		}
+
+		networkID = status.Address + "______"
+	}
+
+	// TODO: Validate network ID here
+
+	endpoint := c.getEndpointURL("/controller/network/" + networkID)
+
+	buffer := bytes.NewBufferString("{}")
+	resp, err := http.Post(endpoint, "application/json", buffer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, ErrBadCode
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	var decodedValue Network
+	err = decoder.Decode(&decodedValue)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &decodedValue, nil
+}
+
+func (c *Controller) RemoveNetwork(networkID string) error {
+	// TODO: Validate network ID here
+	endpoint := c.getEndpointURL("/controller/network/" + networkID)
+
+	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return ErrBadCode
+	}
+
+	return nil
 }
