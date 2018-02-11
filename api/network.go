@@ -3,9 +3,36 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 )
+
+type IPNetString struct {
+	*net.IPNet
+}
+
+func (ins *IPNetString) UnmarshalJSON(jsonValue []byte) error {
+	var rawString string
+	err := json.Unmarshal(jsonValue, &rawString)
+
+	if err != nil {
+		return err
+	}
+
+	_, net, err := net.ParseCIDR(rawString)
+
+	if err != nil {
+		return err
+	}
+
+	ins.IPNet = net
+	return nil
+}
+
+func (ins *IPNetString) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%s"`, ins.String())), nil
+}
 
 type Rule struct {
 	Type      string `json:"type"`
@@ -25,8 +52,8 @@ type V6AssignMode struct {
 }
 
 type Route struct {
-	Target net.IPNet `json:"target"`
-	Via    *net.IP   `json:"via,omitempty"`
+	Target IPNetString `json:"target"`
+	Via    *net.IP     `json:"via"`
 }
 
 type IPAssignmentPool struct {
@@ -39,12 +66,12 @@ type EditableNetwork struct {
 	MulticastLimit    int                `json:"multicastLimit"`
 	Routes            []Route            `json:"routes"`
 	Tags              []string           `json:"tags"`
-	V4AssignMode      V4AssignMode
-	V6AssignMode      V6AssignMode
-	Rules             []Rule `json:"rules"`
-	EnableBroadcast   bool   `json:"enableBroadcast"`
-	Name              string `json:"name"`
-	Private           bool   `json:"private"`
+	V4AssignMode      V4AssignMode       `json:"v4AssignMode"`
+	V6AssignMode      V6AssignMode       `json:"v6AssignMode"`
+	Rules             []Rule             `json:"rules"`
+	EnableBroadcast   bool               `json:"enableBroadcast"`
+	Name              string             `json:"name"`
+	Private           bool               `json:"private"`
 }
 
 type Network struct {
