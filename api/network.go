@@ -116,3 +116,29 @@ func (c *Controller) EditNetwork(networkID string, config *EditableNetwork) (*Ne
 	return &decodedValue, nil
 	// end duplicate from above
 }
+
+func (c *Controller) GetNetworkList() ([]string, error) {
+	endpoint := c.getEndpointURL("/controller/network/")
+
+	resp, err := http.Get(endpoint)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, ErrBadCode
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	var decodedValue []string
+	err = decoder.Decode(&decodedValue)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return decodedValue, nil
+}

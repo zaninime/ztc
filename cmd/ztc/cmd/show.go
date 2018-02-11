@@ -32,12 +32,6 @@ var showCmd = &cobra.Command{
 	Long: `Show a list of all the networks managed by the controller or
 the details about a specific network.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			log.Fatalln("Pass the network id")
-		}
-
-		networkID := args[0]
-
 		url, err := url.Parse(viper.GetString("baseUrl"))
 
 		if err != nil {
@@ -48,6 +42,33 @@ the details about a specific network.`,
 			BaseURL:   *url,
 			AuthToken: viper.GetString("authToken"),
 		}
+
+		if len(args) != 1 {
+			networks, err := cntrl.GetNetworkList()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for _, networkID := range networks {
+				network, err := cntrl.GetNetwork(networkID)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				networkType := "public"
+
+				if network.Private {
+					networkType = "private"
+				}
+
+				fmt.Printf("%s: %s, %s\n", network.ID, network.EditableNetwork.Name, networkType)
+			}
+
+			return
+		}
+
+		networkID := args[0]
 
 		network, err := cntrl.GetNetwork(networkID)
 
