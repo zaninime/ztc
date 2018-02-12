@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -108,6 +109,10 @@ func (c *Controller) GetNetwork(networkID string) (*Network, error) {
 }
 
 func (c *Controller) EditNetwork(networkID string, config *EditableNetwork) (*Network, error) {
+	if config == nil {
+		return nil, errors.New("config is required")
+	}
+
 	endpoint := c.getEndpointURL("/controller/network/" + networkID)
 
 	requestBody, err := json.Marshal(config)
@@ -126,7 +131,6 @@ func (c *Controller) EditNetwork(networkID string, config *EditableNetwork) (*Ne
 
 	defer resp.Body.Close()
 
-	// duplicate from above
 	if resp.StatusCode != http.StatusOK {
 		return nil, ErrBadCode
 	}
@@ -140,7 +144,6 @@ func (c *Controller) EditNetwork(networkID string, config *EditableNetwork) (*Ne
 	}
 
 	return &decodedValue, nil
-	// end duplicate from above
 }
 
 func (c *Controller) GetNetworkList() ([]string, error) {
@@ -169,7 +172,7 @@ func (c *Controller) GetNetworkList() ([]string, error) {
 	return decodedValue, nil
 }
 
-func (c *Controller) AddNetwork(networkID string) (*Network, error) {
+func (c *Controller) AddNetwork(networkID string, config *EditableNetwork) (*Network, error) {
 	if networkID == "" {
 		// auto ID
 		status, err := c.GetStatus()
@@ -182,6 +185,10 @@ func (c *Controller) AddNetwork(networkID string) (*Network, error) {
 	}
 
 	// TODO: Validate network ID here
+	if config == nil {
+		emptyNetwork := EditableNetwork{}
+		config = &emptyNetwork
+	}
 
 	endpoint := c.getEndpointURL("/controller/network/" + networkID)
 

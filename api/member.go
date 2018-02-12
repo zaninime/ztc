@@ -1,7 +1,9 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"net"
 	"net/http"
 )
@@ -95,4 +97,73 @@ func (c *Controller) GetMember(networkID string, nodeID string) (*Member, error)
 	}
 
 	return &decodedValue, nil
+}
+
+func (c *Controller) EditMember(networkID string, nodeID string, config *EditableMember) (*Member, error) {
+	if config == nil {
+		return nil, errors.New("config is required")
+	}
+
+	endpoint := c.getEndpointURL("/controller/network/" + networkID + "/member/" + nodeID)
+
+	requestBody, err := json.Marshal(config)
+
+	requestBodyReader := bytes.NewBuffer(requestBody)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post(endpoint, "application/json", requestBodyReader)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, ErrBadCode
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	var decodedValue Member
+	err = decoder.Decode(&decodedValue)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &decodedValue, nil
+}
+
+func (c *Controller) AddMember(networkID string, nodeID string, config *EditableMember) (*Member, error) {
+
+	if config == nil {
+		emptyConfig := EditableMember{}
+		config = &emptyConfig
+	}
+
+	return c.EditMember(networkID, nodeID, config)
+}
+
+func (c *Controller) RemoveMember(networkID string, nodeID string) error {
+	// TODO: Validate network ID and node ID here
+	endpoint := c.getEndpointURL("/controller/network/" + networkID + "/member/" + nodeID)
+
+	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return ErrBadCode
+	}
+
+	return nil
 }

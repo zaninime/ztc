@@ -30,7 +30,7 @@ var addCmd = &cobra.Command{
 
 		cntrl := getAPIController()
 
-		network, err := cntrl.AddNetwork(networkID)
+		network, err := cntrl.AddNetwork(networkID, nil)
 
 		if err != nil {
 			log.Fatal(err)
